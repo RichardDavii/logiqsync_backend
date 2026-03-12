@@ -5,8 +5,10 @@ const redis = new Redis({
     password: process.env.REDIS_PASSWORD,
     host: process.env.REDIS_ENDPOINT,
     port: process.env.REDIS_PORT,
-    db: 0
+    db: 0,
+    lazyConnect:true
 });
 
 redis.on("ready", () => console.log("Redis conectado"));
 
+export default redis;

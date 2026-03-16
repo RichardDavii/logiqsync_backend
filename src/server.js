@@ -10,7 +10,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(geminiRouter);
 
-
 async function start() {
 
     await redis.connect();

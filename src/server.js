@@ -14,7 +14,7 @@ async function start() {
 
     await redis.connect();
 
-    app.listen(process.env.PORT,
+    await app.listen(process.env.PORT,
         () => console.log("server rodando em: http://localhost:3000")
     );
 }

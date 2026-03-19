@@ -48,11 +48,8 @@ export const getChat = async (req, res) => {
 
     const chatHistory = await redis.get(chatCode);
 
-    if (chatHistory) {
-        res.status(200).send(JSON.parse(chatHistory));
-    } else {
-        res.status(403).send({ message: "Usuário não tem histórico salvo!" });
-    }
+    res.status(200).send(JSON.parse(chatHistory));
+
 }
 
 export const sendPrompt = async (req, res) => {
@@ -60,8 +57,6 @@ export const sendPrompt = async (req, res) => {
     const chatId = req.get("NumberChat");
 
     const chatHistory = await redis.get(chatId);
-
-    if (!chatHistory) return res.status(400).send({ message: "Chat expirado ou inexistente!" });
 
     const newHistoryChat = JSON.parse(chatHistory);
     newHistoryChat.push({
@@ -87,10 +82,6 @@ export const resetChat = async (req, res) => {
 
     const chatId = req.get('NumberChat');
 
-    if (!await redis.exists('NumberChat')) {
-        return res.status(404).send({ message: "Conversa inexistente!" })
-    }
-    
     try {
         await redis.del(chatId);
 
@@ -99,6 +90,4 @@ export const resetChat = async (req, res) => {
 
         res.status(500).send({ message: "Não foi possivel resetar a conversa!" })
     }
-
-
 }

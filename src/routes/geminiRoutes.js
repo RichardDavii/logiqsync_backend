@@ -1,11 +1,14 @@
 import { Router } from "express";
 import { recebeDados, getChat, sendPrompt, resetChat } from "../controllers/geminiController.js";
 import multer from "multer";
+import { chatCodeVerification } from "../middlewares/chatCodeVerification.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 const geminiRouter = Router();
+
+geminiRouter.use(chatCodeVerification)
 
 geminiRouter.post("/sendInfoAnalytics", upload.single('portifolio'), recebeDados)
 geminiRouter.get("/getChat", getChat)

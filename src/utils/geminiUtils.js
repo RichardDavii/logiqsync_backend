@@ -9,11 +9,32 @@ export const createPrompt = (portifolio, vaga) => {
     return prompt;
 }
 
-export const saveInfo = (portifolio, vaga) => {
+const saveInfo = (portifolio, vaga) => {
 
     const info = "CURRÍCULO:\n" + portifolio + "\n" +
         "VAGA:\n" + vaga;
 
     return info;
 
+}
+
+export const createMemoryChat = (conteudoPortifolio, conteudoDescVaga, responseGemini) => {
+
+    const data = [
+        {
+            role: 'user',
+            parts: [{ text: saveInfo(conteudoPortifolio, conteudoDescVaga) }]
+        },
+        {
+            role: 'model',
+            parts: [{ text: JSON.stringify(responseGemini) }]
+        }
+    ]
+
+    const allDataMemory = {
+        data,
+        countPrompts: 1
+    }
+
+    return allDataMemory
 }

@@ -2,7 +2,7 @@ import { sendQuestionGemini, sendRequestGemini } from "../services/geminiService
 import { selectConversor } from "../utils/selectConversor.js";
 import { nanoid } from "nanoid";
 import redis from "../config/redis.js";
-import { createPrompt, saveInfo } from "../utils/geminiUtils.js";
+import { createMemoryChat, createPrompt } from "../utils/geminiUtils.js";
 
 
 export const recebeDados = async (req, res) => {
@@ -18,17 +18,7 @@ export const recebeDados = async (req, res) => {
     if (responseGemini) {
 
         const chatId = nanoid();
-
-        const data = [
-            {
-                role: 'user',
-                parts: [{ text: saveInfo(conteudoPortifolio, conteudoDescVaga) }]
-            },
-            {
-                role: 'model',
-                parts: [{ text: JSON.stringify(responseGemini) }]
-            }
-        ]
+        const data = createMemoryChat(conteudoPortifolio, conteudoDescVaga, responseGemini)
 
         await redis.set(chatId, JSON.stringify(data), 'EX', (60 * 10))
 
@@ -44,43 +34,43 @@ export const recebeDados = async (req, res) => {
 
 export const getChat = async (req, res) => {
 
-    const chatCode = req.get("NumberChat");
+    const chatHistory = req.chatHistory;
 
-    const chatHistory = await redis.get(chatCode);
-
-    res.status(200).send(JSON.parse(chatHistory));
-
+    res.status(200).send(chatHistory.data);
 }
 
 export const sendPrompt = async (req, res) => {
 
-    const chatId = req.get("NumberChat");
+    const chatId = req.idChat;
 
-    const chatHistory = await redis.get(chatId);
+    const chatHistory = req.chatHistory;
 
-    const newHistoryChat = JSON.parse(chatHistory);
-    newHistoryChat.push({
+    chatHistory.data.push({
         role: 'user',
         parts: [{ text: req.body.prompt }]
     });
 
-    const responseGemini = await sendQuestionGemini(newHistoryChat);
+    const responseGemini = await sendQuestionGemini(chatHistory.data);
 
     if (!responseGemini) return res.status(500).send({ message: "Erro ao enviar o PROMPT" });
 
-    newHistoryChat.push({
+    chatHistory.data.push({
         role: 'model',
         parts: [{ text: responseGemini }]
     })
 
-    await redis.set(chatId, JSON.stringify(newHistoryChat), "EX", (60 * 10));
+    chatHistory.countPrompts += 1;
+
+    console.log(chatHistory);
+
+    await redis.set(chatId, JSON.stringify(chatHistory), 'KEEPTTL');
 
     res.status(200).send({ responseGemini })
 }
 
 export const resetChat = async (req, res) => {
 
-    const chatId = req.get('NumberChat');
+    const chatId = req.idChat;
 
     try {
         await redis.del(chatId);

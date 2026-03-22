@@ -28,7 +28,7 @@ export const sendQuestionGemini = async (chatHistory) => {
 
         const response = await genai.models.generateContent({
             contents: chatHistoryWithPrompt,
-            model: "models/gemini-2.5-flash-lite"
+            model: "models/gemini-3-flash-preview"
         })
         const data = response.candidates[0].content.parts[0].text;
 

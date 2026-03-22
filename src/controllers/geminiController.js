@@ -3,9 +3,10 @@ import { selectConversor } from "../utils/selectConversor.js";
 import { nanoid } from "nanoid";
 import redis from "../config/redis.js";
 import { createMemoryChat, createPrompt } from "../utils/geminiUtils.js";
+import { findChatHistory } from "../utils/redisUtils.js";
 
-
-export const recebeDados = async (req, res) => {
+//So pode ser acessada uma vez, caso o usuario possua um codigo válido não poderá mais acessar essa rota
+export const sendInfoAnalytics = async (req, res) => {
 
     const fileType = req.file.mimetype;
     const file = req.file.buffer;
@@ -32,18 +33,20 @@ export const recebeDados = async (req, res) => {
     }
 }
 
+//Caso o usuário possua um codigo valido ele pode acessar essa rota --> OK
 export const getChat = async (req, res) => {
 
-    const chatHistory = req.chatHistory;
+    const chatHistory = await findChatHistory(req.idChat);
 
     res.status(200).send(chatHistory.data);
 }
 
+//Caso o usuário tenha um codigo válido e o limite de prompts seja menor que 10 ele pode acessar
 export const sendPrompt = async (req, res) => {
 
     const chatId = req.idChat;
-
-    const chatHistory = req.chatHistory;
+    
+    const chatHistory = await findChatHistory(chatId);
 
     chatHistory.data.push({
         role: 'user',
@@ -61,13 +64,12 @@ export const sendPrompt = async (req, res) => {
 
     chatHistory.countPrompts += 1;
 
-    console.log(chatHistory);
-
     await redis.set(chatId, JSON.stringify(chatHistory), 'KEEPTTL');
 
     res.status(200).send({ responseGemini })
 }
 
+//So pode acessar se tiver um codigo válido --> OK
 export const resetChat = async (req, res) => {
 
     const chatId = req.idChat;

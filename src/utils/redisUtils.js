@@ -1,7 +1,10 @@
-import redis from "../config/redis"
+import redis from "../config/redis.js"
 
-const saveChatHistory = () => { 
+export const findChatHistory = async (code) =>{
 
-    
+    const response = await redis.get(code);
+    const chatHistory = await JSON.parse(response);
+
+    return chatHistory;
 
 }

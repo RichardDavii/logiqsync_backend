@@ -1,20 +1,22 @@
 import { Router } from "express";
-import { recebeDados, getChat, sendPrompt, resetChat } from "../controllers/geminiController.js";
 import multer from "multer";
+import { sendInfoAnalytics, getChat, sendPrompt, resetChat } from "../controllers/geminiController.js";
 import { chatCodeVerification } from "../middlewares/chatCodeVerification.js";
-import { totalPromptsVerification } from "../middlewares/totalPromptsVerification.js";
+import { chatCodeValidation_Analytics } from "../middlewares/chatCodeValidation_Analytics.js";
+import { promptLimitValidations } from "../middlewares/promptLimitValidation.js";
+import { errorMidleware } from "../middlewares/ErrorMidleware.js";
+
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 const geminiRouter = Router();
 
-geminiRouter.use(chatCodeVerification)
-geminiRouter.use(totalPromptsVerification)
+geminiRouter.post("/sendInfoAnalytics", chatCodeValidation_Analytics, upload.single('portifolio'), sendInfoAnalytics)
+geminiRouter.get("/getChat", chatCodeVerification, getChat)
+geminiRouter.post("/sendPrompt", chatCodeVerification, promptLimitValidations, sendPrompt)
+geminiRouter.delete("/resetChat", chatCodeVerification, resetChat)
 
-geminiRouter.post("/sendInfoAnalytics", upload.single('portifolio'), recebeDados)
-geminiRouter.get("/getChat", getChat)
-geminiRouter.post("/sendPrompt", sendPrompt)
-geminiRouter.delete("/resetChat", resetChat)
+geminiRouter.use(errorMidleware);
 
 export default geminiRouter;

@@ -24,7 +24,7 @@ export const sendQuestionGemini = async (chatHistory) => {
     try {
 
         const chatHistoryWithPrompt = structuredClone(chatHistory);
-        chatHistoryWithPrompt[chatHistory.length - 1].parts[0].text += ` (Retorne apenas um json com um atributo chamado resposta, e a sua opiniao resumida, caso a pergunta não tenha nada a ver com tecnologia retorne "não posso responder isso")`
+        chatHistoryWithPrompt[chatHistory.length - 1].parts[0].text += ` (Retorne apenas um json com um atributo chamado response, e a sua opiniao resumida, caso a pergunta não tenha nada a ver com tecnologia retorne "não posso responder isso")`
 
         const response = await genai.models.generateContent({
             contents: chatHistoryWithPrompt,
@@ -38,7 +38,5 @@ export const sendQuestionGemini = async (chatHistory) => {
         console.log("Erro no gemini", error)
         return null
     }
-
-
 }
 

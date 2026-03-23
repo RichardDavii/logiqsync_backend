@@ -5,6 +5,7 @@ import redis from "./config/redis.js";
 import cors from "cors"
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -14,8 +15,8 @@ async function start() {
 
     await redis.connect();
 
-    app.listen(process.env.PORT,
-        () => console.log("server rodando em: http://localhost:3000")
+    app.listen(port,
+        () => console.log("SERVER RUNNING")
     );
 }
 

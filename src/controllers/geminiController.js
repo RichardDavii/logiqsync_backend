@@ -16,12 +16,12 @@ export const sendInfoAnalytics = async (req, res) => {
 
     const responseGemini = await sendRequestGemini(prompt);
 
-    if (responseGemini) {
+    if (responseGemini && responseGemini.validade == true) {
 
         const chatId = nanoid();
         const data = createMemoryChat(conteudoPortifolio, conteudoDescVaga, responseGemini)
 
-        await redis.set(chatId, JSON.stringify(data), 'EX', (60 * 10))
+        await redis.set(chatId, JSON.stringify(data), 'EX', (60 * 60 * 10))
 
         const responseData = {
             responseGemini,
@@ -45,7 +45,7 @@ export const getChat = async (req, res) => {
 export const sendPrompt = async (req, res) => {
 
     const chatId = req.idChat;
-    
+
     const chatHistory = await findChatHistory(chatId);
 
     chatHistory.data.push({

@@ -21,7 +21,7 @@ export const sendInfoAnalytics = async (req, res) => {
         const chatId = nanoid();
         const data = createMemoryChat(conteudoPortifolio, conteudoDescVaga, responseGemini)
 
-        await redis.set(chatId, JSON.stringify(data), 'EX', (60 * 60 * 10))
+        await redis.set(chatId, JSON.stringify(data), 'EX', (60 * 60 * 2))
 
         const responseData = {
             responseGemini,
